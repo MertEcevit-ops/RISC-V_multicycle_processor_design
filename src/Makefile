@@ -15,6 +15,7 @@ SV_FILES := \
   CTZ.sv              \
   data_path.sv        \
   extend.sv           \
+  FA.sv               \
   flopenr.sv          \
   flopr.sv            \
   fsm.sv              \
@@ -26,6 +27,7 @@ SV_FILES := \
   mux3.sv             \
   mux4.sv             \
   pc.sv               \
+  RCA.sv              \
   reg_file.sv         \
   riscv_pkg.sv        \
   riscv_multicycle.sv \

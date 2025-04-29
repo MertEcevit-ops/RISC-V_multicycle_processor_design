@@ -28,7 +28,7 @@ SV_FILES := \
   pc.sv               \
   reg_file.sv         \
   riscv_pkg.sv        \
-  top.sv              \
+  riscv_multicycle.sv \
   xor_gate.sv
 
 # Single testbench in project root

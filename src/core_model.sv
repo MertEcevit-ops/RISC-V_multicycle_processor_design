@@ -20,7 +20,7 @@ module core_model #(
   output logic             mem_wrt_o    // data‐memory write enable
 );
 
-  import riscv_pkg::*;  // for XLEN
+  //import riscv_pkg::*;  // for XLEN
 
   // internal datapath registers and signals
   logic [XLEN-1:0]   pc, instr;

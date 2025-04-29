@@ -15,6 +15,7 @@ SV_FILES := \
   CTZ.sv              \
   data_path.sv        \
   extend.sv           \
+  equal.sv            \
   FA.sv               \
   flopenr.sv          \
   flopr.sv            \

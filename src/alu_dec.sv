@@ -32,4 +32,4 @@ module alu_dec (input logic [1:0] alu_op,
 		endcase
 	end
 
-endmodule 
+endmodule

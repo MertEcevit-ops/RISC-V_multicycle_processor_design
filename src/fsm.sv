@@ -226,4 +226,4 @@ module fsm (input logic clk,rst,
 	end
 				
 				
-endmodule 
+endmodule

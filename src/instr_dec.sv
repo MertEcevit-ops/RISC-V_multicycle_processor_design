@@ -19,4 +19,4 @@ module instrDec ( input logic [6:0] op,
 	end
 						
 						
-endmodule 
+endmodule

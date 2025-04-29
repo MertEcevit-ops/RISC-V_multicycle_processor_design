@@ -10,4 +10,4 @@ module branch_dec(input logic [6:0] op,
 		assign bltu = (op == 7'b1100011) & (funct3 == 3'b110) & branch ;
 		assign bgeu = (op == 7'b1100011) & (funct3 == 3'b111) & branch ;
 					
-endmodule  
+endmodule

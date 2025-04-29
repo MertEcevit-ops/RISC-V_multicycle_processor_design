@@ -26,4 +26,4 @@ module controller(input logic clk,
 	
 	
 	
-endmodule 
+endmodule

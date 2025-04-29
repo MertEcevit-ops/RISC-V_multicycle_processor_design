@@ -27,164 +27,141 @@ module data_path (
     output logic        overflow,  // tied off below
     output logic        sign,      // tied off below
 
-    // writebacks / retire
+    // outputs
     output logic [31:0] adr,
     output logic [31:0] write_data,
     output logic [31:0] instr
 );
 
-  //==========================================================================
-  // Internal nets
-  //==========================================================================
-  logic [31:0] result, alu_out, alu_result;
-  logic [31:0] rd1, rd2, A, src_a, src_b, data;
-  logic [31:0] imm_ext;
-  logic [31:0] pc, old_pc;
+    // internal nets
+    logic [31:0] result, alu_out, alu_result;
+    logic [31:0] rd1, rd2, A, src_a, src_b, data;
+    logic [31:0] imm_ext;
+    logic [31:0] pc, old_pc;
 
-  //==========================================================================
-  // PC register (with enable=pc_write)
-  //==========================================================================
-  flopenr #(.WIDTH(32)) u_pc_ff (
-    .clk   (clk),
-    .reset (reset),
-    .en    (pc_write),
-    .d     (result),
-    .q     (pc)
-  );
+    // PC register (enable=pc_write)
+    flopenr #(.WIDTH(32)) u_pc_ff (
+        .clk   (clk),
+        .reset (reset),
+        .en    (pc_write),
+        .d     (result),
+        .q     (pc)
+    );
 
-  //==========================================================================
-  // Instruction register (with enable=ir_write)
-  //==========================================================================
-  flopenr #(.WIDTH(32)) u_ir_ff (
-    .clk   (clk),
-    .reset (reset),
-    .en    (ir_write),
-    .d     (read_data),
-    .q     (instr)
-  );
+    // IR register (enable=ir_write)
+    flopenr #(.WIDTH(32)) u_ir_ff (
+        .clk   (clk),
+        .reset (reset),
+        .en    (ir_write),
+        .d     (read_data),
+        .q     (instr)
+    );
 
-  //==========================================================================
-  // Register file
-  //==========================================================================
-  reg_file u_rf (
-    .clk  (clk),
-    .rst  (reset),
-    .we3  (reg_write),
-    .a1   (instr[19:15]),  // rs1
-    .a2   (instr[24:20]),  // rs2
-    .a3   (instr[11:7]),   // rd
-    .wd3  (result),
-    .rd1  (rd1),
-    .rd2  (rd2)
-  );
+    // register file
+    reg_file u_rf (
+        .clk  (clk),
+        .rst  (reset),
+        .we3  (reg_write),
+        .a1   (instr[19:15]),
+        .a2   (instr[24:20]),
+        .a3   (instr[11:7]),
+        .wd3  (result),
+        .rd1  (rd1),
+        .rd2  (rd2)
+    );
 
-  // pipeline rd1→A and rd2→write_data
-  flopr #(.WIDTH(32)) u_regA_ff (
-    .clk   (clk),
-    .reset (reset),
-    .d     (rd1),
-    .q     (A)
-  );
-  flopr #(.WIDTH(32)) u_regB_ff (
-    .clk   (clk),
-    .reset (reset),
-    .d     (rd2),
-    .q     (write_data)
-  );
+    // pipeline rd1→A, rd2→write_data
+    flopr #(.WIDTH(32)) u_regA_ff (
+        .clk   (clk),
+        .reset (reset),
+        .d     (rd1),
+        .q     (A)
+    );
+    flopr #(.WIDTH(32)) u_regB_ff (
+        .clk   (clk),
+        .reset (reset),
+        .d     (rd2),
+        .q     (write_data)
+    );
 
-  //==========================================================================
-  // Immediate extension
-  //==========================================================================
-  extend u_ext (
-    .instr   (instr[31:7]),
-    .imm_src (imm_src),
-    .imm_ext (imm_ext)
-  );
+    // immediate extension
+    extend u_ext (
+        .instr   (instr[31:7]),
+        .imm_src (imm_src),
+        .imm_ext (imm_ext)
+    );
 
-  //==========================================================================
-  // ALU source muxes
-  //==========================================================================
-  mux3 #(.WIDTH(32)) u_mux_src_a (
-    .d0 (pc),
-    .d1 (old_pc),
-    .d2 (A),
-    .s  (alu_src_a),
-    .y  (src_a)
-  );
-  mux3 #(.WIDTH(32)) u_mux_src_b (
-    .d0 (write_data),
-    .d1 (imm_ext),
-    .d2 (32'd4),
-    .s  (alu_src_b),
-    .y  (src_b)
-  );
+    // ALU source muxes
+    mux3 #(.WIDTH(32)) u_mux_src_a (
+        .d0 (pc),
+        .d1 (old_pc),
+        .d2 (A),
+        .s  (alu_src_a),
+        .y  (src_a)
+    );
+    mux3 #(.WIDTH(32)) u_mux_src_b (
+        .d0 (write_data),
+        .d1 (imm_ext),
+        .d2 (32'd4),
+        .s  (alu_src_b),
+        .y  (src_b)
+    );
 
-  //==========================================================================
-  // ALU instance – no .cout port here
-  //==========================================================================
-  alu u_alu (
-    .A            (src_a),
-    .B            (src_b),
-    .alu_control  (alu_control),
-    .add_sub_mode (add_sub_mode),
-    .alu_result   (alu_result),
-    .zero         (zero),
-    .greater      (/*unused*/),
-    .less         (/*unused*/),
-    .u_greater    (/*unused*/),
-    .u_less       (/*unused*/)
-  );
+    // ALU instance
+    alu u_alu (
+        .A            (src_a),
+        .B            (src_b),
+        .alu_control  (alu_control),
+        .add_sub_mode (add_sub_mode),
+        .alu_result   (alu_result),
+        .zero         (zero)
+    );
 
-  // pipeline ALU result
-  flopr #(.WIDTH(32)) u_alu_ff (
-    .clk   (clk),
-    .reset (reset),
-    .d     (alu_result),
-    .q     (alu_out)
-  );
+    // pipeline ALU result
+    flopr #(.WIDTH(32)) u_alu_ff (
+        .clk   (clk),
+        .reset (reset),
+        .d     (alu_result),
+        .q     (alu_out)
+    );
 
-  //==========================================================================
-  // Write‐back MUX
-  //==========================================================================
-  mux4 #(.WIDTH(32)) u_mux_wb (
-    .d0 (alu_out),
-    .d1 (data),
-    .d2 (alu_result),
-    .d3 (imm_ext),
-    .s  (result_src),
-    .y  (result)
-  );
+    // write-back MUX
+    mux4 #(.WIDTH(32)) u_mux_wb (
+        .d0 (alu_out),
+        .d1 (data),
+        .d2 (alu_result),
+        .d3 (imm_ext),
+        .s  (result_src),
+        .y  (result)
+    );
 
-  //==========================================================================
-  // Address MUX & data‐memory pipeline
-  //==========================================================================
-  mux2 #(.WIDTH(32)) u_mux_adr (
-    .d0 (pc),
-    .d1 (result),
-    .s  (adr_src),
-    .y  (adr)
-  );
+    // address MUX
+    mux2 #(.WIDTH(32)) u_mux_adr (
+        .d0 (pc),
+        .d1 (result),
+        .s  (adr_src),
+        .y  (adr)
+    );
 
-  flopenr #(.WIDTH(32)) u_oldpc_ff (
-    .clk   (clk),
-    .reset (reset),
-    .en    (ir_write),
-    .d     (pc),
-    .q     (old_pc)
-  );
-  flopenr #(.WIDTH(32)) u_data_ff (
-    .clk   (clk),
-    .reset (reset),
-    .en    (ir_write),
-    .d     (read_data),
-    .q     (data)
-  );
+    // pipeline old_pc & data
+    flopenr #(.WIDTH(32)) u_oldpc_ff (
+        .clk   (clk),
+        .reset (reset),
+        .en    (ir_write),
+        .d     (pc),
+        .q     (old_pc)
+    );
+    flopenr #(.WIDTH(32)) u_data_ff (
+        .clk   (clk),
+        .reset (reset),
+        .en    (ir_write),
+        .d     (read_data),
+        .q     (data)
+    );
 
-  //==========================================================================
-  // Tie off unused flag outputs
-  //==========================================================================
-  assign cout     = 1'b0;
-  assign overflow = 1'b0;
-  assign sign     = 1'b0;
+    // tie off unused flags
+    assign cout     = 1'b0;
+    assign overflow = 1'b0;
+    assign sign     = 1'b0;
 
 endmodule

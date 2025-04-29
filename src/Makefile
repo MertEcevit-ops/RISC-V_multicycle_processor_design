@@ -11,6 +11,7 @@ SV_FILES := \
   comp.sv             \
   comp_sign.sv        \
   controller.sv       \
+  core_model.sv       \
   CPOP.sv             \
   CTZ.sv              \
   data_path.sv        \
@@ -31,7 +32,6 @@ SV_FILES := \
   RCA.sv              \
   reg_file.sv         \
   riscv_pkg.sv        \
-  riscv_multicycle.sv \
   xor_gate.sv
 
 # Single testbench in project root

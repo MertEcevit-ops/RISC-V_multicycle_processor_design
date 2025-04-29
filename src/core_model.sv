@@ -1,4 +1,4 @@
-module riscv_multicycle #(
+module core_model #(
   parameter XLEN = 32
 )(
   //————— external IF interface ——————————————————————————————————————————————

@@ -11,7 +11,6 @@ SV_FILES := \
   comp.sv             \
   comp_sign.sv        \
   controller.sv       \
-  core_model.sv       \
   CPOP.sv             \
   CTZ.sv              \
   data_path.sv        \

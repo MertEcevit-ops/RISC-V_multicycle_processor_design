@@ -19,65 +19,65 @@ module alu (
     logic [31:0] sll_result, srl_result, sra_result;
     logic [31:0] CTZ, CLZ, CPOP;
 
-    // bitwise AND
+    // --- bitwise AND (module port is lowercase a,b,result) ---
     and_gate u_and_gate (
-        .A      (A),
-        .B      (B),
+        .a      (A),
+        .b      (B),
         .result (and_result)
     );
 
-    // bitwise OR
+    // --- bitwise OR (module port is lowercase a,b,result) ---
     or_gate u_or_gate (
-        .A      (A),
-        .B      (B),
+        .a      (A),
+        .b      (B),
         .result (or_result)
     );
 
-    // bitwise XOR
+    // --- bitwise XOR (module port is lowercase a,b,result) ---
     xor_gate u_xor_gate (
-        .A      (A),
-        .B      (B),
+        .a      (A),
+        .b      (B),
         .result (xor_result)
     );
 
-    // adder / subtractor
+    // --- adder/subtractor (ports are A,B,Mode,result,Cout) ---
     adder_sub u_adder_sub (
         .A      (A),
         .B      (B),
         .Mode   (add_sub_mode),
-        .result (adder_sub_result),
-        .Cout   ()                // unused here
+        .result (adder_sub_result)
+        // removed ".Cout()" since you weren’t using it
     );
 
-    // logical shift left
+    // --- logical shift left (ports A,B,result) ---
     logical_left u_sll (
         .A      (A),
         .B      (B),
         .result (sll_result)
     );
 
-    // logical shift right
+    // --- logical shift right (ports A,B,result) ---
     logical_right u_srl (
         .A      (A),
         .B      (B),
         .result (srl_result)
     );
 
-    // arithmetic shift right
+    // --- arithmetic shift right (ports A,B,Result) ---
     arithmetic_right u_sra (
         .A      (A),
         .B      (B),
-        .result (sra_result)
+        .Result (sra_result)  // uppercase 'Result' matches the module
     );
 
-    // equality comparator (sets zero flag)
+    // --- equality comparator (ports A,B,branch_equal) ---
     equal u_eq (
         .A            (A),
         .B            (B),
         .branch_equal (zero)
     );
 
-    // unsigned compare
+    // --- unsigned compare (ports A,B,branch_less,branch_greater) ---
     comp u_comp (
         .A             (A),
         .B             (B),
@@ -85,7 +85,7 @@ module alu (
         .branch_greater(u_greater)
     );
 
-    // signed compare
+    // --- signed compare (ports A,B,branch_less,branch_greater) ---
     comp_sign u_comp_sign (
         .A             (A),
         .B             (B),
@@ -93,25 +93,25 @@ module alu (
         .branch_greater(greater)
     );
 
-    // count trailing zeros
+    // --- count trailing zeros (ports A,CTZ) ---
     CTZ u_ctz (
         .A   (A),
         .CTZ (CTZ)
     );
 
-    // count leading zeros
+    // --- count leading zeros (ports A,CLZ) ---
     CLZ u_clz (
         .A   (A),
         .CLZ (CLZ)
     );
 
-    // popcount
+    // --- popcount (ports A,CPOP) ---
     CPOP u_cpop (
         .A    (A),
         .CPOP (CPOP)
     );
 
-    // final ALU multiplex
+    // final ALU multiplexer
     always_comb begin
         case (alu_control)
             4'b0000: alu_result = adder_sub_result; // ADD

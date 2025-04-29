@@ -1,4 +1,4 @@
-module instrDec ( input logic [6:0] op,
+module instr_dec ( input logic [6:0] op,
 						output logic [2:0] imm_src);
 
 	always_comb begin

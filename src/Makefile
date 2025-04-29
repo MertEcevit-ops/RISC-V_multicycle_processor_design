@@ -14,7 +14,6 @@ SV_FILES := \
   core_model.sv       \
   CPOP.sv             \
   CTZ.sv              \
-  data_path.sv        \
   extend.sv           \
   equal.sv            \
   FA.sv               \
